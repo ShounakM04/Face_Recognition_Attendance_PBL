@@ -17,8 +17,11 @@ def start_attendance(class_id, password):
     shounak_image = face_recognition.load_image_file("faces/shounak.jpg")
     shounak_encoding = face_recognition.face_encodings(shounak_image)[0]
 
-    known_face_encoding = [swikar_encoding, shounak_encoding]
-    known_face_names = ["Swikar Jadhav", "Shounak Mulay"]
+    Hitesh_image = face_recognition.load_image_file("faces/Hitesh.jpeg")
+    Hitesh_encoding = face_recognition.face_encodings(Hitesh_image)[0]
+
+    known_face_encoding = [swikar_encoding, shounak_encoding, Hitesh_encoding]
+    known_face_names = ["Swikar Jadhav", "Shounak Mulay", "Hitesh Pawar"]
     students = known_face_names.copy()
 
 
@@ -39,6 +42,14 @@ def start_attendance(class_id, password):
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame)
 
+        for (top, right, bottom, left) in face_locations:
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(known_face_encoding, face_encoding)
             face_distance = face_recognition.face_distance(known_face_encoding, face_encoding)
@@ -48,13 +59,11 @@ def start_attendance(class_id, password):
 
             if name in known_face_names:
                 font = cv2.FONT_HERSHEY_SIMPLEX
-                bottomLeftCornerOfText = (10, 100)
-                fontScale = 1.5
-                fontColor = (255, 0, 0)
-                thickness = 3
-                lineType = 2
-                cv2.putText(frame, name + " Present", bottomLeftCornerOfText, font, fontScale, fontColor, thickness,
-                            lineType)
+                text = name + " Present"
+                text_width, text_height = cv2.getTextSize(text, font, fontScale=1, thickness=2)[0]
+                text_left = left + (right - left) // 2 - text_width // 2
+                text_top = top - 10
+                cv2.putText(frame, text, (text_left, text_top), font, fontScale=1, color=(255, 0, 0), thickness=2)
 
                 if name in students:
                     students.remove(name)
